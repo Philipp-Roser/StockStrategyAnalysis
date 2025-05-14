@@ -1,5 +1,0 @@
-User should provide
-- data set
-- strategy
---- single function that is called each step, provided by user
-
