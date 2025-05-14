@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 
 struct Time_Stamp
 {
@@ -30,4 +31,39 @@ struct Candle
     float Volume;
 
     Candle(Time_Stamp timeStamp, float open, float high, float low, float close, float volume);
+};
+
+struct DataSet
+{
+    std::string Symbol = "";
+    std::vector<Candle> Candles;
+
+    
+    Candle operator[](int i);
+    int size();
+
+};
+
+
+enum Buy_Or_Sell { buy, sell };
+
+struct BuySellInstruction
+{
+    Buy_Or_Sell BuyOrSell = buy;
+    float Amount = 0;
+};
+
+
+struct StrategyReport
+{
+    std::string StrategyID = "";
+    std::string Symbol = "";
+    
+    float GrowthPercentTotal = 0;
+    float GrowthPercentAnnualized = 0;
+    
+    std::vector<float> EquityCurve;
+    std::vector<float> InvestmentDelta;
+    std::vector<float> FractionInvested;
+
 };

@@ -58,3 +58,13 @@ string Time_Stamp::ToString()
 Candle::Candle(Time_Stamp timeStamp, float open, float high, float low, float close, float volume)
     : TimeStamp(timeStamp), Open(open), High(high), Low(low), Close(close), Volume(volume) {
 }
+
+Candle DataSet::operator[](int i)
+{
+    return Candles[i];
+}
+
+int DataSet::size()
+{
+    return Candles.size();
+}
