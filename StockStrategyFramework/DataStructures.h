@@ -37,8 +37,7 @@ struct DataSet
 {
     std::string Symbol = "";
     std::vector<Candle> Candles;
-
-    
+        
     Candle operator[](int i);
     int size();
 
@@ -60,7 +59,7 @@ struct StrategyReport
     std::string Symbol = "";
     
     float GrowthPercentTotal = 0;
-    float GrowthPercentAnnualized = 0;
+    //float GrowthPercentAnnualized = 0;
     
     std::vector<float> EquityCurve;
     std::vector<float> InvestmentDelta;

@@ -16,11 +16,20 @@ using Strategy = BuySellInstruction(*)(DataSet* dataSet, int i, float cashOnHand
 
 
 // forward declarations:
-DataSet DataSetFromCSV(string csvPath);
+DataSet DataSetFromCSV(string csvPath, bool isInReverseChronologicalOrder = true);
+StrategyReport ExecuteStrategy(string strategyID,
+    Strategy strategy,
+    DataSet* dataSet,
+    float totalInitialEquity = 1000,
+    float fractionInitiallyInvested = 0.5);
+
+BuySellInstruction TestStrategy(DataSet* dataSet, int i, float cashOnHand, float currentlyInvested);
 
 
 int main()
 {
+    // Test code
+
     std::cout << "Test\n";
 
     char buffer[MAX_PATH];
@@ -31,11 +40,30 @@ int main()
     path.append("/VTI_Daily.csv");
     std::cout << "Filepath: " << path << "\n";
 
-    DataSetFromCSV(path);
+    DataSet testDataSet = DataSetFromCSV(path);
+    StrategyReport testReport = ExecuteStrategy("TestStrat", TestStrategy, &testDataSet, 1000, 0.1);
+    
+    std::cout << testReport.Symbol << "\n" << testReport.StrategyID << "\n" << testReport.GrowthPercentTotal << "\n\n";
+    std::cout << "Date \t\t\ Equity curve: \t\tFractionInvested  \n";
+
+    for (int i = 1; i < testReport.EquityCurve.size(); i++)
+    {
+        std::cout << testDataSet.Candles[i].TimeStamp.ToString() << "\t\t" << testReport.EquityCurve[i] << "\t\t" << testReport.FractionInvested[i] << "\n";
+    }
+
+}
+
+BuySellInstruction TestStrategy(DataSet* dataSet, int i, float cashOnHand, float currentlyInvested)
+{
+    BuySellInstruction instruction;
+    instruction.BuyOrSell = buy;
+    instruction.Amount = 0.1 * cashOnHand;
+
+    return instruction;
 }
 
 
-DataSet DataSetFromCSV(string csvPath)
+DataSet DataSetFromCSV(string csvPath, bool isInReverseChronologicalOrder)
 {
     std::ifstream file(csvPath);
     DataSet dataSet;
@@ -77,6 +105,10 @@ DataSet DataSetFromCSV(string csvPath)
         dataSet.Candles.push_back(Candle(timeStamp, open, high, low, close, volume));
     }
 
+    std::reverse(dataSet.Candles.begin(), dataSet.Candles.end());
+    // Note
+    
+        
     std::cout << "Created data set with " << dataSet.size() << " candles.\n";
     std::cout << "Date starts at " << dataSet[0].TimeStamp.ToString();
     return dataSet;
@@ -89,8 +121,8 @@ DataSet DataSetFromCSV(string csvPath)
 StrategyReport ExecuteStrategy( string strategyID, 
                                 Strategy strategy, 
                                 DataSet* dataSet, 
-                                float totalInitialEquity = 1000, 
-                                float fractionInitiallyInvested = 0.5)
+                                float totalInitialEquity, 
+                                float fractionInitiallyInvested)
 {
     StrategyReport report;
     report.Symbol = dataSet->Symbol;
@@ -138,7 +170,7 @@ StrategyReport ExecuteStrategy( string strategyID,
     }
 
 
-
+    report.GrowthPercentTotal = 100 * ((investment + cash) / totalInitialEquity - 1);
 
 
     return report;
