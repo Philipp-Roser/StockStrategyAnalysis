@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
+#include <cmath>
 
 #include "DataStructures.h"
 
@@ -19,8 +20,6 @@ Time_Stamp::Time_Stamp(int yyyy, int mm, int dd, int hour, int min, int sec)
 
 Time_Stamp::Time_Stamp(string timeStampAsString)
 {
-    std::cout << "TimeStamp created from string: " << timeStampAsString << "\n";
-
     int timeStampFormat = 0;
     if (timeStampAsString.length() == 10)
     {
@@ -86,6 +85,8 @@ void StrategyReport::WriteToFile(string path, bool includeHeader)
         //ofs << "Symbol = " << Symbol << "\n";
         ofs << "Strategy = " << StrategyID << "\n";
         ofs << "Total Percentage Growth = " << GrowthPercentTotal << "\%\n";
+        ofs << "Market Percentage Growth = " << MarketGrowthTotal << "\%\n";
+        ofs << "Relative Volatility = " << RelativeVolatility << "\n";
         ofs << "------------------------------\n";
     }
 
@@ -96,4 +97,31 @@ void StrategyReport::WriteToFile(string path, bool includeHeader)
         ofs << TimeStamps[i].ToString() << "," << EquityCurve[i] << "," << InvestmentDelta[i] << "," << FractionInvested[i] << "\n";
     
     ofs.close();
+}
+
+void StrategyReport::CalculateVolatility()
+{
+    if (TimeStamps.size() == 0)
+    {
+        std::cout << "No data in StrategyReport.\n";
+        return;
+    }
+    
+    int dataCount = TimeStamps.size();
+    int stepCount = dataCount - 1;
+
+    float smoothFracGrowthPerStep = pow(GrowthPercentTotal, 1 / stepCount);
+
+    std::vector<float> constantGrowthCurve = { EquityCurve[0] };
+    for (int i = 1; i < dataCount; i++)
+        constantGrowthCurve.push_back(constantGrowthCurve[i - 1] * smoothFracGrowthPerStep);
+    
+    float rSquared = 0;
+    for (int i = 0; i < dataCount; i++)
+    {
+        float delta = EquityCurve[i] / constantGrowthCurve[i] - 1;
+        rSquared += delta * delta;
+    }
+
+    RelativeVolatility = sqrt(rSquared) / dataCount;
 }

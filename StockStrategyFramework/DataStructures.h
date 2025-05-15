@@ -59,6 +59,8 @@ struct StrategyReport
     //std::string Symbol = "";
     
     float GrowthPercentTotal = 0;
+    float MarketGrowthTotal = 0;
+    float RelativeVolatility = 0;
     //float GrowthPercentAnnualized = 0;
     
     std::vector<Time_Stamp> TimeStamps;
@@ -67,4 +69,5 @@ struct StrategyReport
     std::vector<float> FractionInvested;
 
     void WriteToFile(std::string path, bool includeHeader = true);
+    void CalculateVolatility();
 };

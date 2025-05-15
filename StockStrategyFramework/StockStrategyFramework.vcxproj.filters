@@ -23,6 +23,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StockStrategyFramework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="DataStructures.h">
       <Filter>Source Files</Filter>
     </ClInclude>

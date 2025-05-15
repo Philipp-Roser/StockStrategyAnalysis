@@ -8,23 +8,15 @@
 
 
 #include "DataStructures.h"
+#include "StockStrategyFramework.h"
 
 
 
 using string = std::string;
-using Strategy = BuySellInstruction(*)(DataSet* dataSet, int i, float cashOnHand, float currentlyInvested);
 
 
-// forward declarations:
-DataSet DataSetFromCSV(string csvPath, bool isInReverseChronologicalOrder = true);
-StrategyReport ExecuteStrategy(string strategyID,
-    Strategy strategy,
-    DataSet* dataSet,
-    float totalInitialEquity = 1000,
-    float fractionInitiallyInvested = 0.5);
-
+/*
 BuySellInstruction TestStrategy(DataSet* dataSet, int i, float cashOnHand, float currentlyInvested);
-
 
 int main()
 {
@@ -42,9 +34,13 @@ int main()
     std::cout << "Filepath: " << path << "\n";
 
     DataSet testDataSet = DataSetFromCSV(path);
-    StrategyReport testReport = ExecuteStrategy("TestStrat", TestStrategy, &testDataSet, 1000, 0.1);
+    StrategyReport testReport = ExecuteStrategy("TestStrat", TestStrategy, &testDataSet, 1000, 0.5);
     
-    std::cout /* << testReport.Symbol*/ << "\n" << testReport.StrategyID << "\n" << testReport.GrowthPercentTotal << "\n\n";
+    std::cout //<< testReport.Symbol << "\n"  
+                << "StrategyID = " << testReport.StrategyID << "\n"
+                << "GrowthPercentTotal = " << testReport.GrowthPercentTotal << "\n"
+                << "MarketGrowthPercent = " << testReport.MarketGrowthTotal << "\n"
+                << "RelativeVolatility = " << testReport.RelativeVolatility << "\n\n";
     std::cout << "Date \t\t\ Equity curve: \t\tFractionInvested  \n";
 
     for (int i = 1; i < testReport.EquityCurve.size(); i++)
@@ -57,15 +53,34 @@ int main()
 
 }
 
+
 BuySellInstruction TestStrategy(DataSet* dataSet, int i, float cashOnHand, float currentlyInvested)
 {
     BuySellInstruction instruction;
-    instruction.BuyOrSell = buy;
-    instruction.Amount = 0.1 * cashOnHand;
+
+    if (i == 0)
+    {
+        instruction.BuyOrSell = buy;
+        instruction.Amount = 0;
+        return instruction;
+    }
+
+    if ((*dataSet)[i].Open > (*dataSet)[i - 1].Open)
+    {
+        instruction.BuyOrSell = sell;
+        instruction.Amount = 0.1 * currentlyInvested;
+    }
+
+    else
+    {
+        instruction.BuyOrSell = buy;
+        instruction.Amount = 0.1 * cashOnHand;
+    }
+
 
     return instruction;
 }
-
+*/
 
 DataSet DataSetFromCSV(string csvPath, bool isInReverseChronologicalOrder)
 {
@@ -177,6 +192,9 @@ StrategyReport ExecuteStrategy( string strategyID,
 
 
     report.GrowthPercentTotal = 100 * ((investment + cash) / totalInitialEquity - 1);
+    report.CalculateVolatility();
+
+    report.MarketGrowthTotal = 100 * (dataSet->Candles.back().Close / dataSet->Candles.front().Open - 1);
 
     std::cout << "Strategy executed.\n";
 
