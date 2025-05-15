@@ -4,82 +4,17 @@
 #include <string>
 #include <sstream>
 
-#include <windows.h> // TEMP
 
 
 #include "DataStructures.h"
 #include "StockStrategyFramework.h"
 
-
-
 using string = std::string;
 
 
+
 /*
-BuySellInstruction TestStrategy(DataSet* dataSet, int i, float cashOnHand, float currentlyInvested);
-
-int main()
-{
-    // Test code
-
-    std::cout << "Test\n";
-
-
-    char buffer[MAX_PATH];
-    DWORD length = GetModuleFileNameA(NULL, buffer, MAX_PATH);
-    string path = std::string(buffer, length);
-    size_t lastSlash = path.find_last_of("\\/");
-    path = path.substr(0, lastSlash);
-    path.append("/VTI_Daily.csv");
-    std::cout << "Filepath: " << path << "\n";
-
-    DataSet testDataSet = DataSetFromCSV(path);
-    StrategyReport testReport = ExecuteStrategy("TestStrat", TestStrategy, &testDataSet, 1000, 0.5);
-    
-    std::cout //<< testReport.Symbol << "\n"  
-                << "StrategyID = " << testReport.StrategyID << "\n"
-                << "GrowthPercentTotal = " << testReport.GrowthPercentTotal << "\n"
-                << "MarketGrowthPercent = " << testReport.MarketGrowthTotal << "\n"
-                << "RelativeVolatility = " << testReport.RelativeVolatility << "\n\n";
-    std::cout << "Date \t\t\ Equity curve: \t\tFractionInvested  \n";
-
-    for (int i = 1; i < testReport.EquityCurve.size(); i++)
-    {
-        std::cout << testReport.TimeStamps[i].ToString() << "\t\t" << testReport.EquityCurve[i] << "\t\t" << testReport.FractionInvested[i] << "\n";
-    }
-
-    path = path.append("out");
-    testReport.WriteToFile(path);
-
-}
-
-
-BuySellInstruction TestStrategy(DataSet* dataSet, int i, float cashOnHand, float currentlyInvested)
-{
-    BuySellInstruction instruction;
-
-    if (i == 0)
-    {
-        instruction.BuyOrSell = buy;
-        instruction.Amount = 0;
-        return instruction;
-    }
-
-    if ((*dataSet)[i].Open > (*dataSet)[i - 1].Open)
-    {
-        instruction.BuyOrSell = sell;
-        instruction.Amount = 0.1 * currentlyInvested;
-    }
-
-    else
-    {
-        instruction.BuyOrSell = buy;
-        instruction.Amount = 0.1 * cashOnHand;
-    }
-
-
-    return instruction;
-}
+ TO DO : Add Bid-ask spread
 */
 
 DataSet DataSetFromCSV(string csvPath, bool isInReverseChronologicalOrder)
@@ -145,13 +80,12 @@ StrategyReport ExecuteStrategy( string strategyID,
 {
     std::cout << "Executing strategy ...\n";
     StrategyReport report;
-    //report.Symbol = dataSet->Symbol;
-    report.StrategyID = strategyID;
-
     int dataCount = dataSet->size();
+
+    report.StrategyID = strategyID;
     report.EquityCurve.reserve(dataCount);
-    report.FractionInvested.reserve(dataCount);
-    report.InvestmentDelta.reserve(dataCount);
+    report.StockPriceAtOpen.reserve(dataCount);
+    report.Instruction.reserve(dataCount);
 
     float totalEquity = totalInitialEquity;
     float investment = totalEquity * fractionInitiallyInvested;
@@ -161,22 +95,22 @@ StrategyReport ExecuteStrategy( string strategyID,
     {
         report.TimeStamps.push_back(dataSet->Candles[i].TimeStamp.ToString());
         report.EquityCurve.push_back(cash + investment);
-        report.FractionInvested.push_back(investment / (cash + investment));
+        report.StockPriceAtOpen.push_back((*dataSet)[i].Open);
 
         BuySellInstruction instruction = strategy(dataSet, i, cash, investment);
         
+        report.Instruction.push_back(instruction);
+
         switch (instruction.BuyOrSell)
         {
         case buy:
             cash -= instruction.Amount;
             investment += instruction.Amount;
-            report.InvestmentDelta.push_back(instruction.Amount);
             break;
 
         case sell:
             cash += instruction.Amount;
             investment -= instruction.Amount;
-            report.InvestmentDelta.push_back(-instruction.Amount);
             break;
         }
 

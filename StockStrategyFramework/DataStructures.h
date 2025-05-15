@@ -44,29 +44,28 @@ struct DataSet
 };
 
 
-enum Buy_Or_Sell { buy, sell };
+enum Buy_Or_Sell { buy = 1, sell = -1 };
 
 struct BuySellInstruction
 {
     Buy_Or_Sell BuyOrSell = buy;
     float Amount = 0;
+    std::string TypedInstruction();
 };
 
 
 struct StrategyReport
 {
     std::string StrategyID = "";
-    //std::string Symbol = "";
     
     float GrowthPercentTotal = 0;
     float MarketGrowthTotal = 0;
     float RelativeVolatility = 0;
-    //float GrowthPercentAnnualized = 0;
     
     std::vector<Time_Stamp> TimeStamps;
+    std::vector<float> StockPriceAtOpen;
     std::vector<float> EquityCurve;
-    std::vector<float> InvestmentDelta;
-    std::vector<float> FractionInvested;
+    std::vector<BuySellInstruction> Instruction;
 
     void WriteToFile(std::string path, bool includeHeader = true);
     void CalculateVolatility();

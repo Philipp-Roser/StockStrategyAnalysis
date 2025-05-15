@@ -76,6 +76,16 @@ int DataSet::size()
     return Candles.size();
 }
 
+string BuySellInstruction::TypedInstruction()
+{
+    std::stringstream ss;
+    if (BuyOrSell == buy) ss << "Buy: " << Amount;
+    else if (BuyOrSell == sell) ss << "Sell: " << Amount;
+    else ss << "No valid instruction.";
+
+    return ss.str();
+}
+
 void StrategyReport::WriteToFile(string path, bool includeHeader)
 {
     std::ofstream ofs(path);
@@ -92,9 +102,10 @@ void StrategyReport::WriteToFile(string path, bool includeHeader)
 
     float dataCount = TimeStamps.size();
 
-    ofs << "TimeStamp, Equity Curve, Equity Delta, Fraction Invested \n";
+    ofs << "TimeStamp, Equity Curve, Stock Price (at open), OrderType \n";
     for (int i = 0; i < dataCount; i++)
-        ofs << TimeStamps[i].ToString() << "," << EquityCurve[i] << "," << InvestmentDelta[i] << "," << FractionInvested[i] << "\n";
+        ofs << TimeStamps[i].ToString() << "," << EquityCurve[i] << "," 
+            << StockPriceAtOpen[i] << "," << Instruction[i].TypedInstruction() << "\n";
     
     ofs.close();
 }
