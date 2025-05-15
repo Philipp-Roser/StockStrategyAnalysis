@@ -32,6 +32,7 @@ int main()
 
     std::cout << "Test\n";
 
+
     char buffer[MAX_PATH];
     DWORD length = GetModuleFileNameA(NULL, buffer, MAX_PATH);
     string path = std::string(buffer, length);
@@ -43,13 +44,16 @@ int main()
     DataSet testDataSet = DataSetFromCSV(path);
     StrategyReport testReport = ExecuteStrategy("TestStrat", TestStrategy, &testDataSet, 1000, 0.1);
     
-    std::cout << testReport.Symbol << "\n" << testReport.StrategyID << "\n" << testReport.GrowthPercentTotal << "\n\n";
+    std::cout /* << testReport.Symbol*/ << "\n" << testReport.StrategyID << "\n" << testReport.GrowthPercentTotal << "\n\n";
     std::cout << "Date \t\t\ Equity curve: \t\tFractionInvested  \n";
 
     for (int i = 1; i < testReport.EquityCurve.size(); i++)
     {
-        std::cout << testDataSet.Candles[i].TimeStamp.ToString() << "\t\t" << testReport.EquityCurve[i] << "\t\t" << testReport.FractionInvested[i] << "\n";
+        std::cout << testReport.TimeStamps[i].ToString() << "\t\t" << testReport.EquityCurve[i] << "\t\t" << testReport.FractionInvested[i] << "\n";
     }
+
+    path = path.append("out");
+    testReport.WriteToFile(path);
 
 }
 
@@ -72,7 +76,7 @@ DataSet DataSetFromCSV(string csvPath, bool isInReverseChronologicalOrder)
     std::getline(file, headerLine);
     if (headerLine != "timestamp,open,high,low,close,volume")
     {
-        std::cout << "First line is:\n" << headerLine << "\n but should read: \"timestamp,open,high,low,close,volume\".";
+        std::cout << "First line is:\n" << headerLine << "\n but should read: \"timestamp,open,high,low,close,volume\".\n";
         return dataSet;
     }
 
@@ -105,12 +109,12 @@ DataSet DataSetFromCSV(string csvPath, bool isInReverseChronologicalOrder)
         dataSet.Candles.push_back(Candle(timeStamp, open, high, low, close, volume));
     }
 
-    std::reverse(dataSet.Candles.begin(), dataSet.Candles.end());
-    // Note
+    if(isInReverseChronologicalOrder)
+        std::reverse(dataSet.Candles.begin(), dataSet.Candles.end());
     
         
     std::cout << "Created data set with " << dataSet.size() << " candles.\n";
-    std::cout << "Date starts at " << dataSet[0].TimeStamp.ToString();
+    std::cout << "Date starts at " << dataSet[0].TimeStamp.ToString() << "\n";
     return dataSet;
     
 
@@ -124,8 +128,9 @@ StrategyReport ExecuteStrategy( string strategyID,
                                 float totalInitialEquity, 
                                 float fractionInitiallyInvested)
 {
+    std::cout << "Executing strategy ...\n";
     StrategyReport report;
-    report.Symbol = dataSet->Symbol;
+    //report.Symbol = dataSet->Symbol;
     report.StrategyID = strategyID;
 
     int dataCount = dataSet->size();
@@ -139,6 +144,7 @@ StrategyReport ExecuteStrategy( string strategyID,
 
     for (int i = 0; i < dataCount; i++)
     {
+        report.TimeStamps.push_back(dataSet->Candles[i].TimeStamp.ToString());
         report.EquityCurve.push_back(cash + investment);
         report.FractionInvested.push_back(investment / (cash + investment));
 
@@ -172,6 +178,7 @@ StrategyReport ExecuteStrategy( string strategyID,
 
     report.GrowthPercentTotal = 100 * ((investment + cash) / totalInitialEquity - 1);
 
+    std::cout << "Strategy executed.\n";
 
     return report;
 }

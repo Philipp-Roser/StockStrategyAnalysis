@@ -56,13 +56,15 @@ struct BuySellInstruction
 struct StrategyReport
 {
     std::string StrategyID = "";
-    std::string Symbol = "";
+    //std::string Symbol = "";
     
     float GrowthPercentTotal = 0;
     //float GrowthPercentAnnualized = 0;
     
+    std::vector<Time_Stamp> TimeStamps;
     std::vector<float> EquityCurve;
     std::vector<float> InvestmentDelta;
     std::vector<float> FractionInvested;
 
+    void WriteToFile(std::string path, bool includeHeader = true);
 };
