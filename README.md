@@ -58,4 +58,26 @@ BuySellInstruction MyBrilliantStrategy(DataSet* dataSet, int i, float cashOnHand
 }
 ```
 
+In order to process multiple strategies in bulk (e.g. similar strategies with differently tuned parameters), use
+```
+StrategiesMetaReport ExecuteStrategyCollection(
+    std::vector<std::string> strategyIDs, 
+    std::vector<Strategy> strategies,
+    DataSet* dataSet,
+    float totalInitialEquity = 1000,
+    float totalInitiallyInvested = 0.5);
+```
+The StrategiesMetaReport contains all the individual strategy reports, as well as information about the best-performing one. Its declaration is
+```
+struct StrategiesMetaReport
+{
+    std::vector<StrategyReport> StategyReports;
+
+    float LargestGrowth;
+    StrategyReport BestStrategy;
+
+    void WriteBestToFile(std::string path);
+};
+```
+
 
