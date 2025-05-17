@@ -135,3 +135,41 @@ StrategyReport ExecuteStrategy( string strategyID,
     return report;
 }
 
+
+
+StrategiesMetaReport ExecuteStrategyCollection(
+    std::vector<std::string> strategyIDs,
+    std::vector<Strategy> strategies,
+    DataSet* dataSet,
+    float totalInitialEquity,
+    float totalInitiallyInvested)
+{
+    if (strategyIDs.size() != strategies.size())
+    {
+        std::cout << "ERROR: stategyIDs vs strategies count mismatch.";
+        StrategiesMetaReport report;
+        return report;
+    }
+
+    int strategyCount = strategies.size();
+    std::vector<StrategyReport> stratReports;
+
+    StrategyReport currentBest;
+
+    for (int i = 0; i < strategyCount; i++)
+    {
+        StrategyReport thisStrategyReport = ExecuteStrategy(
+            strategyIDs[i], strategies[i], dataSet, totalInitialEquity, totalInitiallyInvested);
+                
+        stratReports.push_back(thisStrategyReport);
+        if (thisStrategyReport.GrowthPercentTotal > currentBest.GrowthPercentTotal)
+            currentBest = thisStrategyReport;
+    }
+
+    StrategiesMetaReport metaReport;
+    metaReport.StategyReports = stratReports;
+    metaReport.BestStrategy = currentBest;
+    metaReport.LargestGrowth = currentBest.GrowthPercentTotal;
+
+    return metaReport;
+}

@@ -70,3 +70,14 @@ struct StrategyReport
     void WriteToFile(std::string path, bool includeHeader = true);
     void CalculateVolatility();
 };
+
+
+struct StrategiesMetaReport
+{
+    std::vector<StrategyReport> StategyReports;
+
+    float LargestGrowth;
+    StrategyReport BestStrategy;
+
+    void WriteBestToFile(std::string path);
+};

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "DataStructures.h"
 
@@ -27,3 +28,12 @@ StrategyReport ExecuteStrategy(
     DataSet* dataSet,
     float totalInitialEquity = 1000,
     float fractionInitiallyInvested = 0.5);
+
+
+
+StrategiesMetaReport ExecuteStrategyCollection(
+    std::vector<std::string> strategyIDs, 
+    std::vector<Strategy> strategies,
+    DataSet* dataSet,
+    float totalInitialEquity = 1000,
+    float totalInitiallyInvested = 0.5);

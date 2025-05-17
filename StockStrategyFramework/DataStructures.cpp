@@ -136,3 +136,8 @@ void StrategyReport::CalculateVolatility()
 
     RelativeVolatility = sqrt(rSquared) / dataCount;
 }
+
+void StrategiesMetaReport::WriteBestToFile(string path)
+{
+    BestStrategy.WriteToFile(path, true);
+}
